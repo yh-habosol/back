@@ -98,11 +98,6 @@ class _LoginPageState extends State<LoginPage> {
         if (_key.currentState!.validate()) {
           // 여기에 작성
           try {
-            // await FirebaseAuth.instance
-            //     .signInWithEmailAndPassword(
-            //         email: _emailController.text, password: _pwdController.text)
-            //     .then((_) => Navigator.pushNamed(context, "/"));
-
             UserCredential authResult =
                 await FirebaseAuth.instance.signInWithEmailAndPassword(
               email: _emailController.text,
@@ -122,6 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                   userSnapshot.data() as Map<String, dynamic>;
 
               // '/home' 라우트로 이동하면서 사용자 정보를 전달
+
               Navigator.pushNamed(context, "/", arguments: userData);
             }
           } on FirebaseAuthException catch (e) {

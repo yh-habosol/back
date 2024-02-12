@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:practice/login.dart';
 import 'package:flutter/material.dart';
+import 'package:routemaster/routemaster.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,15 +15,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    userData =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (BuildContext con, AsyncSnapshot<User?> user) {
         if (!user.hasData) {
           return const LoginPage();
         } else {
+          userData = (ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>?) ??
+              {};
+
           return Scaffold(
             appBar: AppBar(
               title: const Text("Firebase App"),
@@ -31,15 +33,35 @@ class _HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.logout),
                   onPressed: () async => await FirebaseAuth.instance
                       .signOut()
-                      .then((_) => Navigator.pushNamed(context, "/login")),
+                      .then((_) => Routemaster.of(context).push('/login')),
                 ),
               ],
             ),
             body: Center(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('User Name: ${userData['name']}'),
-                  Text('User Pw: ${userData['password']}')
+                  const Text("login success"),
+                  Text('User Name: ${userData['name'] ?? "N/A"}'),
+                  Text('User Email: ${userData['email'] ?? "N/A"}'),
+                  Text('User Level: ${userData['level'] ?? "N/A"}'),
+                  Text('User Progress: ${userData['progress'] ?? "N/A"}'),
+                  ElevatedButton(
+                    onPressed: () {
+                      // /posts로 이동하는 버튼
+                      // Navigator.pushNamed(context, "/community");
+                      Routemaster.of(context).push('/community');
+                    },
+                    child: const Text('Go to /posts'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // /posts로 이동하는 버튼
+                      // Navigator.pushNamed(context, "/map");
+                      Routemaster.of(context).push('/map');
+                    },
+                    child: const Text('Go to /map'),
+                  ),
                 ],
               ),
             ),
@@ -49,15 +71,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-
-// body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Text('User Name: ${userData['name']}'),
-//             Text('User Email: ${userData['email']}'),
-//             // 여기에 다른 사용자 정보를 표시하는 위젯들을 추가할 수 있습니다.
-//           ],
-//         ),
-//       ),

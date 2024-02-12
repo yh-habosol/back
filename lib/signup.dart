@@ -110,11 +110,16 @@ class _SignupPageState extends State<SignupPage> {
                 .doc(authResult.user!.uid)
                 .set({
               // 'name', 'email', 등 사용자 정보를 추가할 수 있습니다.
-              'name': _emailController.text,
-              'email': _pwdController.text,
+              'email': _emailController.text,
+              'name': _emailController.text.split('@')[0],
               'level': 0,
-              'posts': [],
+              'progress': 0,
+              'prifile_image': "",
+              'daily_challenge': [],
               'done_challenge': [],
+              'friends': [],
+              'posts': [],
+              'user_post': [],
             });
 
             // 등록 후 /로 이동
