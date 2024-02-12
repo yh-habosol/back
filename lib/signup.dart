@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:routemaster/routemaster.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -92,12 +93,6 @@ class _SignupPageState extends State<SignupPage> {
         if (_key.currentState!.validate()) {
           // 여기에 작성
           try {
-            // final credential = await FirebaseAuth.instance
-            //     .createUserWithEmailAndPassword(
-            //       email: _emailController.text,
-            //       password: _pwdController.text,
-            //     )
-            //     .then((_) => Navigator.pushNamed(context, "/"));
             UserCredential authResult =
                 await FirebaseAuth.instance.createUserWithEmailAndPassword(
               email: _emailController.text,
@@ -114,16 +109,11 @@ class _SignupPageState extends State<SignupPage> {
               'name': _emailController.text.split('@')[0],
               'level': 0,
               'progress': 0,
-              'prifile_image': "",
-              'daily_challenge': [],
-              'done_challenge': [],
-              'friends': [],
-              'posts': [],
-              'user_post': [],
+              'profile_image': "",
             });
 
             // 등록 후 /로 이동
-            Navigator.pushNamed(context, "/login");
+            Routemaster.of(context).push('/');
           } on FirebaseAuthException catch (e) {
             if (e.code == 'weak-password') {
               print('The password provided is too weak.');

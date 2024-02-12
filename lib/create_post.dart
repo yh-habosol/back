@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:routemaster/routemaster.dart';
@@ -18,7 +19,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create Post"),
+        title: const Text("create post"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -27,25 +28,27 @@ class _CreatePostPageState extends State<CreatePostPage> {
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: const InputDecoration(labelText: 'title'),
             ),
             TextField(
               controller: contentController,
-              decoration: const InputDecoration(labelText: 'Content'),
+              decoration: const InputDecoration(labelText: 'content'),
             ),
             TextField(
               controller: maxNumberController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Maximum Number'),
+              decoration: const InputDecoration(labelText: 'max number'),
             ),
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
-                // Create post and navigate back to the community page
+                // 포스트 작성 및 커뮤니티 페이지로 이동
+                print("press button");
                 await createPost();
                 Routemaster.of(context).pop();
+                // Routemaster.of(context).push('/community');
               },
-              child: const Text('Create Post'),
+              child: const Text('crate post'),
             ),
           ],
         ),
@@ -59,29 +62,59 @@ class _CreatePostPageState extends State<CreatePostPage> {
     final int maxNumber = int.tryParse(maxNumberController.text.trim()) ?? 0;
 
     if (title.isNotEmpty && content.isNotEmpty && maxNumber > 0) {
-      // Add the post to Firestore
-      await FirebaseFirestore.instance.collection('Posts').add({
-        'author':
-            'CurrentUser', // You may replace this with the actual author information
-        'title': title,
-        'content': content,
-        'createdAt': FieldValue.serverTimestamp(),
-        'maxNumber': maxNumber,
-      });
+      // 현재 사용자 가져오기
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser != null) {
+        // 사용자 정보 가져오기
+        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUser.uid)
+            .get();
+
+        if (userSnapshot.exists) {
+          final String author = userSnapshot['name'] ?? 'N/A';
+          // final Map<String, dynamic> location = userSnapshot['location'] ?? {};
+
+          // 포스트 Firestore에 추가
+          final DocumentReference postRef =
+              await FirebaseFirestore.instance.collection('Posts').add({
+            'author': author,
+            'title': title,
+            'content': content,
+            'createdAt': DateTime.now().microsecondsSinceEpoch,
+            'maxNumber': maxNumber,
+            // 'location': location,
+            'userId': userSnapshot.id,
+            'numParticipate': 1,
+            'numLike': 0,
+          });
+
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(userSnapshot.id)
+              .collection('posts')
+              .doc(postRef.id)
+              .set({
+            'postId': postRef.id,
+            // 여기에 포스트와 관련된 추가 정보를 넣을 수 있습니다.
+          });
+        }
+      }
     } else {
-      // Handle validation errors
+      // 유효성 검사 오류 처리
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Validation Error'),
-            content: const Text('Please fill in all fields with valid values.'),
+            title: const Text('유효성 검사 오류'),
+            content: const Text('모든 필드를 채워주세요.'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('OK'),
+                child: const Text('확인'),
               ),
             ],
           );

@@ -35,25 +35,24 @@ class PostsPage extends StatelessWidget {
 
               final String author = data['author'] ?? "N/A";
               final String content = data['content'] ?? "N/A";
-              final int createdAt = data['createdAt'] ?? -1;
+              final DateTime createdAt =
+                  DateTime.fromMillisecondsSinceEpoch(data['createdAt']);
+              final int numParticipate = data['numParticipate'] ?? -1;
+              final int maxNumber = data['maxNumber'] ?? -1;
               final String postId = posts[index].id;
 
               return ListTile(
-                title: Text(author),
+                title: Text("author: $author"),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(content),
-                    Text(createdAt.toString()),
-                    // 추가적인 Text 위젯을 필요에 따라 계속 추가할 수 있습니다.
+                    Text("content: $content"),
+                    Text("$numParticipate / $maxNumber"),
+                    Text(
+                        "CreatedAt: ${createdAt.year} ${createdAt.month} ${createdAt.day}"),
                   ],
                 ),
                 onTap: () {
-                  // ListTile이 클릭되었을 때 실행되는 코드
-                  // Navigator.pushNamed(
-                  //   context,
-                  //   '/community/$postId', // post의 ID를 경로에 추가
-                  // );
                   Routemaster.of(context).push('/community/$postId');
                 },
               );

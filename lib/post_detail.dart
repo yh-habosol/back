@@ -30,13 +30,24 @@ class CommunityDetailPage extends StatelessWidget {
           final Map<String, dynamic> data =
               snapshot.data!.data() as Map<String, dynamic>;
 
+          final String author = data['author'] ?? "N/A";
+          final String content = data['content'] ?? "N/A";
+          final DateTime createdAt =
+              DateTime.fromMillisecondsSinceEpoch(data['createdAt']);
+          final int numParticipate = data['numParticipate'] ?? -1;
+          final int maxNumber = data['maxNumber'] ?? -1;
+          final int numLike = data['numLike'] ?? -1;
+
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Post ID: $postId"),
-                Text("Author: ${data['author']}"),
-                Text("Content: ${data['content']}"),
+                Text("author: $author"),
+                Text("content: $content"),
+                Text("$numParticipate / $maxNumber"),
+                Text(
+                    "CreatedAt: ${createdAt.year} ${createdAt.month} ${createdAt.day}"),
+                Text("numLike: $numLike"),
                 // 추가적인 필드에 대한 정보를 출력할 수 있습니다.
               ],
             ),
