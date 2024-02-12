@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:routemaster/routemaster.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -32,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
                 loginButton(),
                 const SizedBox(height: 15),
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/signup'),
+                  onPressed: () => Routemaster.of(context).push('/signup'),
                   child: const Text(
                     "Sign Up",
                   ),
@@ -107,18 +108,16 @@ class _LoginPageState extends State<LoginPage> {
             if (authResult.user != null) {
               // 로그인 성공한 경우
               // 해당 사용자의 정보를 Firestore에서 가져옴
-              DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-                  .collection('Users')
-                  .doc(authResult.user!.uid)
-                  .get();
+              // DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+              //     .collection('Users')
+              //     .doc(authResult.user!.uid)
+              //     .get();
 
               // 사용자 정보를 Map 형태로 추출
-              Map<String, dynamic> userData =
-                  userSnapshot.data() as Map<String, dynamic>;
 
               // '/home' 라우트로 이동하면서 사용자 정보를 전달
 
-              Navigator.pushNamed(context, "/", arguments: userData);
+              Routemaster.of(context).push('/');
             }
           } on FirebaseAuthException catch (e) {
             if (e.code == 'user-not-found') {
