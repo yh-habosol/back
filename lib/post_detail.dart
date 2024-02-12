@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:routemaster/routemaster.dart';
 
-class CommunityDetailPage extends StatelessWidget {
+class PostDetailPage extends StatelessWidget {
   final String postId;
-  const CommunityDetailPage({Key? key, required this.postId}) : super(key: key);
+  const PostDetailPage({Key? key, required this.postId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class CommunityDetailPage extends StatelessWidget {
               snapshot.data!.data() as Map<String, dynamic>;
 
           final String author = data['author'] ?? "N/A";
+          final String title = data['title'] ?? "N/A";
           final String content = data['content'] ?? "N/A";
           final DateTime createdAt =
               DateTime.fromMillisecondsSinceEpoch(data['createdAt']);
@@ -38,17 +41,43 @@ class CommunityDetailPage extends StatelessWidget {
           final int maxNumber = data['maxNumber'] ?? -1;
           final int numLike = data['numLike'] ?? -1;
 
+          final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+          bool isCurrentUserAuthor = currentUserId == data['userId'];
+
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text("author: $author"),
+                Text("title: $title"),
                 Text("content: $content"),
                 Text("$numParticipate / $maxNumber"),
                 Text(
                     "CreatedAt: ${createdAt.year} ${createdAt.month} ${createdAt.day}"),
                 Text("numLike: $numLike"),
-                // 추가적인 필드에 대한 정보를 출력할 수 있습니다.
+                if (isCurrentUserAuthor)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          // Edit 버튼 누를 때의 동작
+                          Routemaster.of(context)
+                              .push('/community/$postId/edit');
+                        },
+                        child: const Text('Edit'),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Delete 버튼 누를 때의 동작
+                          Routemaster.of(context)
+                              .push('/community/$postId/delete');
+                        },
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
               ],
             ),
           );

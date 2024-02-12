@@ -34,6 +34,7 @@ class PostsPage extends StatelessWidget {
                   posts[index].data() as Map<String, dynamic>;
 
               final String author = data['author'] ?? "N/A";
+              final String title = data['title'] ?? "N/A";
               final String content = data['content'] ?? "N/A";
               final DateTime createdAt =
                   DateTime.fromMillisecondsSinceEpoch(data['createdAt']);
@@ -46,6 +47,7 @@ class PostsPage extends StatelessWidget {
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text("title: $title"),
                     Text("content: $content"),
                     Text("$numParticipate / $maxNumber"),
                     Text(
