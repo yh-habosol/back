@@ -174,6 +174,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
           .collection('join_challenges')
           .doc(widget.postId)
           .delete();
+
+      await FirebaseFirestore.instance
+          .collection('Posts')
+          .doc(widget.postId)
+          .collection('join_users')
+          .doc(currentUserId)
+          .delete();
     } else {
       if (numParticipate < maxNumber) {
         numParticipate++;
@@ -193,6 +200,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
             .collection('join_challenges')
             .doc(widget.postId)
             .set({});
+
+        await FirebaseFirestore.instance
+            .collection('Posts')
+            .doc(widget.postId)
+            .collection('join_users')
+            .doc(currentUserId)
+            .set({
+          'userId': currentUserId,
+          // 여기에 join_users와 관련된 추가 정보를 넣을 수 있습니다.
+        });
       } else {
         // 변경: 인원이 다 찼을 때 팝업 표시
         showDialog(

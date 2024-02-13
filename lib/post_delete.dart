@@ -46,6 +46,44 @@ class _PostDeletePageState extends State<PostDeletePage> {
                       .delete();
                 }
 
+                // 3. 해당 포스트의 join_users 컬렉션에 있는 각 사용자에 대해
+                //    join_challenges에서 현재 삭제되는 포스트 ID를 삭제
+                final QuerySnapshot joinUsersSnapshot = await FirebaseFirestore
+                    .instance
+                    .collection('Posts')
+                    .doc(widget.postId)
+                    .collection('join_users')
+                    .get();
+
+                for (final QueryDocumentSnapshot userSnapshot
+                    in joinUsersSnapshot.docs) {
+                  final String userId = userSnapshot.id;
+
+                  // join_challenges에서 현재 삭제되는 포스트 ID 삭제
+                  await FirebaseFirestore.instance
+                      .collection('Users')
+                      .doc(userId)
+                      .collection('join_challenges')
+                      .doc(widget.postId)
+                      .delete();
+
+                  await FirebaseFirestore.instance
+                      .collection('Users')
+                      .doc(userId)
+                      .collection('posts')
+                      .doc(widget.postId)
+                      .delete();
+                }
+                await FirebaseFirestore.instance
+                    .collection('Posts')
+                    .doc(widget.postId)
+                    .collection('join_users')
+                    .get()
+                    .then((snapshot) {
+                  for (final doc in snapshot.docs) {
+                    doc.reference.delete();
+                  }
+                });
                 // 3. /community 페이지로 리디렉션
 
                 Routemaster.of(context).replace('/community');

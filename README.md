@@ -34,10 +34,15 @@ To Do List
 - location 정보 가져와서 저정도 해야함
 - 좋아요 버튼 누르면 숫자 올라가고 해당 post에 반영 (v)
 - join 버튼 누르면 -> 정원 다 차기 전이면 추가되고 참여 인원 수 증가 (v)
+- 게시글 생성하면 post에 join_users에 작성한 user id 추가하기 (v)
+- 게시글 생성하면 작성한 user에 join_challenge 컬렉션에 해당 post id 추가 (v)
 - join 누르면 -> user join_challenge 컬렉션에 해당 post 하나 추가
 - join 버튼 누르면 해당 post에 join_users 컬랙션에 user 추가
 - delete 버튼 누르면 -> post에 join_users에 있는 각 user에 대해 join_challenge에서 해당 post
 		      삭제
+- done 버튼 누르면 -> 해당 게시글 완료 처리, 등록된 각 유저에 대해 join_challenge에서 삭제,
+		     각 유저에 대해 done_challenge에 해당 post id 추가
+
 - 댓글
     -댓글 달기
     -댓글 단 유저와 로그인한 유저 같으면 edit, delete버튼 보이게 하기

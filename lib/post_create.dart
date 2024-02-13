@@ -90,6 +90,20 @@ class _CreatePostPageState extends State<CreatePostPage> {
             'numLike': 0,
           });
 
+          await postRef.collection('join_users').doc(currentUser.uid).set({
+            'userId': currentUser.uid,
+          });
+
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(currentUser.uid)
+              .collection('join_challenges')
+              .doc(postRef.id)
+              .set({
+            'postId': postRef.id,
+            // 여기에 join_challenges와 관련된 추가 정보를 넣을 수 있습니다.
+          });
+
           await FirebaseFirestore.instance
               .collection('Users')
               .doc(userSnapshot.id)
