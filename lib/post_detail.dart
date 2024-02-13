@@ -18,6 +18,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
   late int maxNumber;
   late bool isParticipating;
   late bool isCurrentUserAuthor;
+  TextEditingController commentController = TextEditingController();
+
+  final TextEditingController editCommentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +126,221 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       ),
                     ],
                   ),
+
+                // 댓글 작성 부분
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Comments",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      // 댓글 목록 출력
+                      StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('Posts')
+                            .doc(widget.postId)
+                            .collection('comments')
+                            .orderBy('createdAt', descending: true)
+                            .snapshots(),
+                        builder: (context, commentSnapshot) {
+                          if (!commentSnapshot.hasData ||
+                              commentSnapshot.data!.docs.isEmpty) {
+                            return const Text('No comments yet.');
+                          }
+
+                          return Column(
+                            children: commentSnapshot.data!.docs
+                                .map((comment) => buildCommentItem(comment))
+                                .toList(),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // 댓글 작성 폼
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: commentController,
+                              decoration: const InputDecoration(
+                                  labelText: 'Add a comment'),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: () {
+                              // 댓글 작성 버튼 눌렀을 때의 동작
+                              handlePostComment();
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           );
         },
       ),
     );
+  }
+
+  // 댓글 아이템을 만드는 함수
+  Widget buildCommentItem(QueryDocumentSnapshot comment) {
+    final Map<String, dynamic> commentData =
+        comment.data() as Map<String, dynamic>;
+
+    final String commentAuthor = commentData['author'] ?? "Unknown";
+    final String commentContent = commentData['content'] ?? "No content";
+    final DateTime commentCreatedAt =
+        DateTime.fromMillisecondsSinceEpoch(commentData['createdAt']);
+
+    final String commentUserId = commentData['userId'] ?? ""; // 댓글의 userId 가져오기
+    final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+              "autohr: $commentAuthor  createdAt: ${commentCreatedAt.toLocal()}"),
+          Text("comment: $commentContent"),
+          if (commentUserId == currentUserId)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // Edit 버튼 누를 때의 동작
+                    handleEditComment(comment.id, commentContent);
+                  },
+                  child: const Text('Edit'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Delete 버튼 누를 때의 동작
+                    handleDeleteComment(comment.id);
+                  },
+                  child: const Text('Delete'),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+// Edit 댓글을 처리하는 함수
+  void handleEditComment(String commentId, String currentContent) async {
+    // 수정된 내용을 입력받는 다이얼로그 표시
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        editCommentController.text = currentContent; // 현재 내용으로 초기화
+        return AlertDialog(
+          title: const Text('Edit Comment'),
+          content: TextFormField(
+            controller: editCommentController,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              labelText: 'Edit your comment',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // 취소 버튼 누를 때
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // 수정 내용을 다이얼로그에서 가져와 업데이트
+                handleSaveEdit(commentId);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// 수정된 내용을 저장하는 함수
+  void handleSaveEdit(String commentId) async {
+    final String editedContent = editCommentController.text.trim();
+
+    if (editedContent.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('Posts')
+          .doc(widget.postId)
+          .collection('comments')
+          .doc(commentId)
+          .update({
+        'content': editedContent,
+      });
+
+      // 화면을 업데이트
+      setState(() {});
+      Navigator.pop(context); // 다이얼로그 닫기
+    }
+  }
+
+// Delete 댓글을 처리하는 함수
+  void handleDeleteComment(String commentId) async {
+    await FirebaseFirestore.instance
+        .collection('Posts')
+        .doc(widget.postId)
+        .collection('comments')
+        .doc(commentId)
+        .delete();
+  }
+
+  // 댓글을 작성하는 함수
+  void handlePostComment() async {
+    final String commentContent = commentController.text.trim();
+
+    if (commentContent.isNotEmpty) {
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser != null) {
+        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUser.uid)
+            .get();
+
+        if (userSnapshot.exists) {
+          final String commentAuthor = userSnapshot['name'] ?? 'Unknown';
+
+          // 현재 로그인한 사용자의 userID를 가져오기
+          final String commentAuthorId = currentUser.uid;
+
+          await FirebaseFirestore.instance
+              .collection('Posts')
+              .doc(widget.postId)
+              .collection('comments')
+              .add({
+            'author': commentAuthor,
+            'userId': commentAuthorId, // userID 추가
+            'createdAt': DateTime.now().millisecondsSinceEpoch,
+            'content': commentContent,
+          });
+
+          // 댓글 작성 후 입력칸 초기화
+          commentController.clear();
+        }
+      }
+    }
   }
 
   void handleJoinButton() async {
