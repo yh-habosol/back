@@ -84,6 +84,16 @@ class _PostDeletePageState extends State<PostDeletePage> {
                     doc.reference.delete();
                   }
                 });
+                await FirebaseFirestore.instance
+                    .collection('Posts')
+                    .doc(widget.postId)
+                    .collection('comments')
+                    .get()
+                    .then((snapshot) {
+                  for (final doc in snapshot.docs) {
+                    doc.reference.delete();
+                  }
+                });
                 // 3. /community 페이지로 리디렉션
 
                 Routemaster.of(context).replace('/community');
