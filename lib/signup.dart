@@ -107,9 +107,10 @@ class _SignupPageState extends State<SignupPage> {
               // 'name', 'email', 등 사용자 정보를 추가할 수 있습니다.
               'email': _emailController.text,
               'name': _emailController.text.split('@')[0],
-              'level': 0,
+              'level': 1,
               'progress': 0,
               'profile_image': "",
+              'exp': 0
             });
 
             // 등록 후 /로 이동

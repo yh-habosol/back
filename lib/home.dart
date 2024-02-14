@@ -98,6 +98,12 @@ class _HomePageState extends State<HomePage> {
                         },
                         child: const Text('Go to /map'),
                       ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Routemaster.of(context).push('/challenge');
+                        },
+                        child: const Text('Go to /challenge'),
+                      ),
                     ],
                   ),
                 );

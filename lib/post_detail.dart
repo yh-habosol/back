@@ -76,8 +76,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 Text("title: $title"),
                 Text("content: $content"),
                 Text("Current Participants: $numParticipate / $maxNumber"),
-                Text(
-                    "CreatedAt: ${createdAt.year} ${createdAt.month} ${createdAt.day}"),
+                Text("CreatedAt: ${createdAt.toLocal()}"),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -76,13 +76,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
           final String author = userSnapshot['name'] ?? 'N/A';
           // final Map<String, dynamic> location = userSnapshot['location'] ?? {};
 
+          // 사용자의 현재 위치 가져오기
+
           // 포스트 Firestore에 추가
           final DocumentReference postRef =
               await FirebaseFirestore.instance.collection('Posts').add({
             'author': author,
             'title': title,
             'content': content,
-            'createdAt': DateTime.now().microsecondsSinceEpoch,
+            'createdAt': DateTime.now().millisecondsSinceEpoch,
             'maxNumber': maxNumber,
             // 'location': location,
             'userId': userSnapshot.id,

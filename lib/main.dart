@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:practice/challenge.dart';
 import 'package:practice/community.dart';
 import 'package:practice/post_create.dart';
 import 'package:practice/firebase_options.dart';
@@ -24,6 +25,7 @@ final routes = RouteMap(routes: {
   '/': (route) => const MaterialPage(child: HomePage()),
   '/login': (route) => const MaterialPage(child: LoginPage()),
   '/signup': (route) => const MaterialPage(child: SignupPage()),
+  '/challenge': (route) => const MaterialPage(child: ChallengePage()),
   '/community': (route) => const MaterialPage(child: PostsPage()),
   '/community/create': (route) => const MaterialPage(child: CreatePostPage()),
   '/community/:id': (route) => MaterialPage(

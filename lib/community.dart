@@ -50,8 +50,7 @@ class PostsPage extends StatelessWidget {
                     Text("title: $title"),
                     Text("content: $content"),
                     Text("$numParticipate / $maxNumber"),
-                    Text(
-                        "CreatedAt: ${createdAt.year} ${createdAt.month} ${createdAt.day}"),
+                    Text("CreatedAt: ${createdAt.toLocal()}"),
                   ],
                 ),
                 onTap: () {
