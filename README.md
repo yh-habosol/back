@@ -57,9 +57,9 @@
 
 
 버튼 누르면 -> daily challenge 5개 랜덤으로 추출 (v)
-매일 아침 6시가 되면 모든 user의 daily challenge는 []가 됨
-random challenge 화면에 출력
+random challenge 화면에 출력 (v)
 각 challenge의 content와, 옆에 체크 박스가 있음
+매일 아침 6시가 되면 모든 user의 daily challenge는 []가 됨 -> 이런 식으로 구현할 지? 만약 이렇게 구현한다면 플랫폼마다 시간 체크하는 방법이 다르다고 해서 상의하고 결정
 
 
 체크박스 체크하면, 체크 해제하면
