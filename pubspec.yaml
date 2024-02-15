@@ -45,6 +45,7 @@ dependencies:
   geolocator: ^7.7.1
   location: ^5.0.3
   workmanager: ^0.5.1
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

@@ -58,12 +58,17 @@
 
 버튼 누르면 -> daily challenge 5개 랜덤으로 추출 (v)
 random challenge 화면에 출력 (v)
-각 challenge의 content와, 옆에 체크 박스가 있음
+각 challenge의 content와, 옆에 체크 박스가 있음 (v)
+
 매일 아침 6시가 되면 모든 user의 daily challenge는 []가 됨 -> 이런 식으로 구현할 지? 만약 이렇게 구현한다면 플랫폼마다 시간 체크하는 방법이 다르다고 해서 상의하고 결정
 
 
-체크박스 체크하면, 체크 해제하면
--> 
+체크박스 체크하면 -> 현재 로그인 한 유저의 done_challenge에 해당 challenge 추가, exp 1 증가
+					여기서 exp가 10이 되면, exp 0되고 level 1 증가
+					
+체크 해제하면 -> 현재 로그인 한 유저의  done_challenge에 해당 challenge 삭제, 
+				만약 exp가 0이면 -> exp 9로 변화 + level -1 , exp가 0이 아니면, exp - 1 
+  
 
 
 exp는 변화할 때마다 exp가 10이 되면, level +1 하고, exp 다시 0으로 바꿈

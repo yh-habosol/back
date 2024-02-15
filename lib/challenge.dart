@@ -11,6 +11,8 @@ class ChallengePage extends StatefulWidget {
 
 class _ChallengePageState extends State<ChallengePage> {
   List<String> dailyChallenges = [];
+  List<bool> challengeCheckboxes = [];
+  List<String> challengeIds = [];
 
   @override
   void initState() {
@@ -29,14 +31,21 @@ class _ChallengePageState extends State<ChallengePage> {
             .doc(currentUser.uid)
             .collection('daily_challenges')
             .get();
-        print("is userChallenegspan? ${userChallengesSnapshot.docs}");
+        print("isEmpty? $userChallengesSnapshot");
         if (userChallengesSnapshot.docs.isNotEmpty) {
           List<String> loadedChallenges = userChallengesSnapshot.docs
-              .map((challengeDoc) => challengeDoc['challenge'] as String)
+              .map((challengeDoc) => challengeDoc['challengeId'] as String)
+              .toList();
+
+          List<String> loadedChallengeIds = userChallengesSnapshot.docs
+              .map((challengeDoc) => challengeDoc.id)
               .toList();
 
           setState(() {
             dailyChallenges = loadedChallenges;
+            challengeCheckboxes =
+                List.generate(dailyChallenges.length, (index) => false);
+            challengeIds = loadedChallengeIds;
           });
         }
       }
@@ -56,7 +65,7 @@ class _ChallengePageState extends State<ChallengePage> {
 
         List<QueryDocumentSnapshot> allChallenges = allChallengesSnapshot.docs;
 
-// 랜덤으로 5개의 문서를 선택
+        // 랜덤으로 5개의 문서를 선택
         List<QueryDocumentSnapshot> randomChallenges = List.from(allChallenges)
           ..shuffle();
 
@@ -64,18 +73,15 @@ class _ChallengePageState extends State<ChallengePage> {
           randomChallenges = randomChallenges.take(5).toList();
         }
 
-        print("Random Challenges: ${randomChallenges.map((doc) => doc.id)}");
-
-        List<String> newChallenges = randomChallenges
-            .map((challengeDoc) => challengeDoc['challenge'] as String)
-            .toList();
-        print("newChallenge: $newChallenges");
-        print("random? $newChallenges");
+        List<String> newChallenges =
+            randomChallenges.map((challengeDoc) => challengeDoc.id).toList();
 
         await _deleteAndCreateUserChallenges(currentUser.uid, randomChallenges);
 
         setState(() {
           dailyChallenges = newChallenges;
+          challengeCheckboxes =
+              List.generate(dailyChallenges.length, (index) => false);
         });
       }
     } catch (e) {
@@ -89,7 +95,7 @@ class _ChallengePageState extends State<ChallengePage> {
         .collection('Users')
         .doc(userId)
         .collection('daily_challenges');
-    print(randomChallenges.map((doc) => doc.id));
+
     // daily_challenges 컬렉션 삭제
     await userChallengesCollection.get().then((querySnapshot) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
@@ -100,8 +106,93 @@ class _ChallengePageState extends State<ChallengePage> {
     // daily_challenges 컬렉션에 랜덤으로 선택된 challenge 문서들의 id 추가
     for (QueryDocumentSnapshot challengeDoc in randomChallenges) {
       await userChallengesCollection.add({
-        'challenge': challengeDoc.id,
+        'challengeId': challengeDoc.id,
       });
+    }
+  }
+
+  Future<void> _completeChallenge(String challengeId) async {
+    try {
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser != null) {
+        // 사용자의 done_challenges 컬렉션에 현시점 년도:에 해당 challenge id 저장
+        String currentYear = DateTime.now().year.toString();
+        String currentMonth = DateTime.now().month.toString();
+
+        CollectionReference doneChallengesCollection = FirebaseFirestore
+            .instance
+            .collection('Users')
+            .doc(currentUser.uid)
+            .collection('done_challenges')
+            .doc(currentYear)
+            .collection(currentMonth);
+
+        int index = challengeIds.indexOf(challengeId);
+
+        DocumentReference docRef = FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUser.uid)
+            .collection('daily_challenges')
+            .doc(challengeIds[index]);
+
+        DocumentSnapshot docSnapshot = await docRef.get();
+
+        dynamic fieldValue = docSnapshot['challengeId'];
+
+        // 체크박스가 체크된 문서의 challengeId를 저장
+        await doneChallengesCollection.add({
+          'challengeId': fieldValue,
+        });
+
+        // 사용자의 exp를 1 증가
+        int userExp = await _getUserExp(currentUser.uid);
+        await _updateUserExp(currentUser.uid, userExp + 1);
+
+        // 사용자의 exp가 10 이상이면 level을 1 증가하고 exp 초기화
+        if (userExp + 1 >= 10) {
+          await _increaseUserLevel(currentUser.uid);
+          await _updateUserExp(currentUser.uid, 0);
+        }
+      }
+    } catch (e) {
+      print('Error completing challenge: $e');
+    }
+  }
+
+  Future<int> _getUserExp(String userId) async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .get();
+
+      return userSnapshot['exp'] ?? 0;
+    } catch (e) {
+      print('Error getting user exp: $e');
+      return 0;
+    }
+  }
+
+  Future<void> _updateUserExp(String userId, int exp) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .update({'exp': exp});
+    } catch (e) {
+      print('Error updating user exp: $e');
+    }
+  }
+
+  Future<void> _increaseUserLevel(String userId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .update({'level': FieldValue.increment(1)});
+    } catch (e) {
+      print('Error increasing user level: $e');
     }
   }
 
@@ -117,11 +208,41 @@ class _ChallengePageState extends State<ChallengePage> {
           children: [
             if (dailyChallenges.isNotEmpty)
               Column(
-                children: dailyChallenges
-                    .map((challenge) => ListTile(
-                          title: Text('Challenge: $challenge'),
-                        ))
-                    .toList(),
+                children: List.generate(dailyChallenges.length, (index) {
+                  String challenge = dailyChallenges[index];
+                  return ListTile(
+                    title: Row(
+                      children: [
+                        Checkbox(
+                          value: challengeCheckboxes[index],
+                          onChanged: (value) {
+                            setState(() {
+                              challengeCheckboxes[index] = value!;
+                              if (value) {
+                                _completeChallenge(challengeIds[index]);
+                              }
+                            });
+                          },
+                        ),
+                        FutureBuilder<DocumentSnapshot>(
+                          future: FirebaseFirestore.instance
+                              .collection('Challenges')
+                              .doc(challenge)
+                              .get(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              return Text(
+                                'Challenge: ${snapshot.data!['challenge']}',
+                              );
+                            }
+                            return const CircularProgressIndicator();
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ),
             const SizedBox(height: 16),
             ElevatedButton(
