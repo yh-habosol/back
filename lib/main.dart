@@ -11,6 +11,8 @@ import 'package:practice/post_delete.dart';
 import 'package:practice/post_detail.dart';
 import 'package:practice/post_edit.dart';
 import 'package:practice/signup.dart';
+import 'package:practice/user_detail.dart';
+import 'package:practice/user_edit.dart';
 import 'package:routemaster/routemaster.dart';
 
 Future<void> main() async {
@@ -23,6 +25,8 @@ Future<void> main() async {
 
 final routes = RouteMap(routes: {
   '/': (route) => const MaterialPage(child: HomePage()),
+  '/:id': (route) => const MaterialPage(child: UserDetailPage()),
+  '/:id/edit': (route) => const MaterialPage(child: UserEditPage()),
   '/login': (route) => const MaterialPage(child: LoginPage()),
   '/signup': (route) => const MaterialPage(child: SignupPage()),
   '/challenge': (route) => const MaterialPage(child: ChallengePage()),

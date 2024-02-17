@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:routemaster/routemaster.dart';
+import 'package:geolocator/geolocator.dart';
 
 class CreatePostPage extends StatefulWidget {
   const CreatePostPage({Key? key}) : super(key: key);
@@ -77,6 +78,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
           // final Map<String, dynamic> location = userSnapshot['location'] ?? {};
 
           // 사용자의 현재 위치 가져오기
+          Position position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high);
+          print("log: ${position.longitude}, lat: ${position.latitude}");
+          final double logitude = position.longitude;
+          final double latitude = position.latitude;
 
           // 포스트 Firestore에 추가
           final DocumentReference postRef =
@@ -86,7 +92,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
             'content': content,
             'createdAt': DateTime.now().millisecondsSinceEpoch,
             'maxNumber': maxNumber,
-            // 'location': location,
+            'location': {
+              "lat": latitude,
+              "log": logitude,
+            },
             'userId': userSnapshot.id,
             'numParticipate': 1,
             'numLike': 0,

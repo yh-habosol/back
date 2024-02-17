@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class ChallengePage extends StatefulWidget {
   const ChallengePage({Key? key}) : super(key: key);
@@ -43,8 +44,8 @@ class _ChallengePageState extends State<ChallengePage> {
 
           setState(() {
             dailyChallenges = loadedChallenges;
-            challengeCheckboxes =
-                List.generate(dailyChallenges.length, (index) => false);
+            // challengeCheckboxes =
+            //     List.generate(dailyChallenges.length, (index) => false);
             challengeIds = loadedChallengeIds;
           });
         }
@@ -76,12 +77,14 @@ class _ChallengePageState extends State<ChallengePage> {
         List<String> newChallenges =
             randomChallenges.map((challengeDoc) => challengeDoc.id).toList();
 
+        print("newChallenges: $newChallenges");
+
         await _deleteAndCreateUserChallenges(currentUser.uid, randomChallenges);
 
         setState(() {
           dailyChallenges = newChallenges;
-          challengeCheckboxes =
-              List.generate(dailyChallenges.length, (index) => false);
+          // challengeCheckboxes =
+          //     List.generate(dailyChallenges.length, (index) => false);
         });
       }
     } catch (e) {
@@ -187,12 +190,31 @@ class _ChallengePageState extends State<ChallengePage> {
 
   Future<void> _increaseUserLevel(String userId) async {
     try {
+      // 1. Increase user's level
       await FirebaseFirestore.instance
           .collection('Users')
           .doc(userId)
           .update({'level': FieldValue.increment(1)});
+
+      // 2. Get a random waterdrop key (waterdrop1 ~ waterdrop6)
+      List<String> waterdropKeys = [
+        'waterdrop1',
+        'waterdrop2',
+        'waterdrop3',
+        'waterdrop4',
+        'waterdrop5',
+        'waterdrop6'
+      ];
+      String randomWaterdropKey =
+          waterdropKeys[Random().nextInt(waterdropKeys.length)];
+
+      // 3. Increment the selected waterdrop count
+      await FirebaseFirestore.instance.collection('Users').doc(userId).update({
+        'user_waterdrop_counts.$randomWaterdropKey': FieldValue.increment(1),
+      });
     } catch (e) {
-      print('Error increasing user level: $e');
+      print(
+          'Error increasing user level and incrementing random waterdrop: $e');
     }
   }
 
@@ -213,17 +235,17 @@ class _ChallengePageState extends State<ChallengePage> {
                   return ListTile(
                     title: Row(
                       children: [
-                        Checkbox(
-                          value: challengeCheckboxes[index],
-                          onChanged: (value) {
-                            setState(() {
-                              challengeCheckboxes[index] = value!;
-                              if (value) {
-                                _completeChallenge(challengeIds[index]);
-                              }
-                            });
-                          },
-                        ),
+                        // Checkbox(
+                        //   value: challengeCheckboxes[index],
+                        //   onChanged: (value) {
+                        //     setState(() {
+                        //       challengeCheckboxes[index] = value!;
+                        //       if (value) {
+                        //         _completeChallenge(challengeIds[index]);
+                        //       }
+                        //     });
+                        //   },
+                        // ),
                         FutureBuilder<DocumentSnapshot>(
                           future: FirebaseFirestore.instance
                               .collection('Challenges')
@@ -232,6 +254,7 @@ class _ChallengePageState extends State<ChallengePage> {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.done) {
+                              print("id?: ${snapshot.data!.id}");
                               return Text(
                                 'Challenge: ${snapshot.data!['challenge']}',
                               );

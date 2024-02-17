@@ -110,7 +110,23 @@ class _SignupPageState extends State<SignupPage> {
               'level': 1,
               'progress': 0,
               'profile_image': "",
-              'exp': 0
+              'exp': 0,
+              'user_flower_counts': {
+                'flower1': 0,
+                'flower2': 0,
+                'flower3': 0,
+                'flower4': 0,
+                'flower5': 0,
+                'flower6': 0,
+              },
+              'user_waterdrop_counts': {
+                'waterdrop1': 0,
+                'waterdrop2': 0,
+                'waterdrop3': 0,
+                'waterdrop4': 0,
+                'waterdrop5': 0,
+                'waterdrop6': 0,
+              },
             });
 
             // 등록 후 /로 이동
