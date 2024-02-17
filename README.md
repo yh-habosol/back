@@ -54,11 +54,7 @@ random challenge 화면에 출력 (v)
 각 challenge의 content와, 옆에 체크 박스가 있음 (v)
 
 
-
-				만약 exp가 0이면 -> exp 9로 변화 + level -1 , exp가 0이 아니면, exp - 1 
-  
-
-
+만약 exp가 0이면 -> exp 9로 변화 + level -1 , exp가 0이 아니면, exp - 1 (v)
 exp는 변화할 때마다 exp가 10이 되면, level +1 하고, exp 다시 0으로 바꿈 (v)
 
 
@@ -66,6 +62,8 @@ exp는 변화할 때마다 exp가 10이 되면, level +1 하고, exp 다시 0으
 level 1 증가하면 -> user의 waterdrop1 ~6 랜덤으로 1 증가 시키기(v)
 
 
+- location 정보 post 할 때 저장 (v)
+- 지도 페이지 -> 현재 내 위치 좌표 기준 반경 몇 미터 이내 좌표 게시물 목록 나열 (v)
 
 
 ///////////
@@ -74,21 +72,18 @@ level 1 증가하면 -> user의 waterdrop1 ~6 랜덤으로 1 증가 시키기(v)
  - 월별은 분류가 월 단위니까 그냥 해당 월 done challenge 개수 세면 됨
 
 
-community challenge done 하면 
+
+///community challenge done 하면 exp 증가시킬거?
+community challenge done 하면  
 해당 post done 처리, 해당 post에 있는 각각의 join_user들에 대해 join_challenge에서 해당 
 post id 제거, 해당 월 done_challenge post id 추가, exp 1 추가
 
 
-- location 정보 post 할 때 저장 (v)
-- 지도 페이지 -> 현재 내 위치 좌표 기준 반경 몇 미터 이내 좌표 게시물 목록 나열 ()
 
-
-- 회원정보 수정 -> profile image 설정 () -> flutter 앱으로 해야되는데 웹으로 하니까 버그 너무 많아서 안됨
-
+회원정보 수정 -> profile image 설정 () -> flutter 앱으로 해야되는데 웹으로 하니까 버그 너무 많아서 안됨
 
 
 체크박스 체크하면 -> 현재 로그인 한 유저의 done_challenge에 해당 challenge 추가, exp 1 증가 ()
 					여기서 exp가 10이 되면, exp 0되고 level 1 증가 ()
-
 
 체크 해제하면 -> 현재 로그인 한 유저의  done_challenge에 해당 challenge 삭제, 

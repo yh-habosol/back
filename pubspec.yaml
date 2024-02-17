@@ -49,6 +49,8 @@ dependencies:
   google_sign_in: ^6.1.6
   path_provider: ^2.1.2
   path: ^1.8.3
+  geodesy: ^0.10.2
+  latlong2: ^0.9.0
 
 dev_dependencies:
   flutter_test:
